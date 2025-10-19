@@ -1,0 +1,708 @@
+.data
+node_size:      .space   176         # Increased size for 'node' structure in bytes (72 + 100 for disease + 4 padding)
+
+# Define the 'node' structure
+node:
+    .word 0                 # age (offset 0)
+    .word 0                 # id (offset 4)
+    .word 0                 # gender (offset 8)
+    .word 0                 # reservation (offset 12)
+    .word 0                 # next pointer (offset 16)
+    .space 52               # name (maximum size) (offset 20)
+    .space 100              # disease (new attribute) (offset 72)
+no_of_nodes:    .word   0
+
+data_not_found_msg: .asciiz "Data not found\n"
+
+reservation_struct_size:   .word 4     # Size of 'reservation' structure in words
+
+# Structure for reservation
+reservation:
+    .word 0                     # start_time
+    .word 0                     # finish_time
+    .word 0                     # id
+    .word 0                     # reservation_number
+    
+id_prompt:          .asciiz "please enter ID: "
+age_prompt:         .asciiz "please enter age: "
+gender_prompt:      .asciiz "please enter gender(1 for male or 0 for female): "
+name_prompt:        .asciiz "please enter name: "
+disease_prompt:     .asciiz "please enter disease/medical condition: "
+gender_error:       .asciiz "number out of range choose a valid number\n"
+id_used_msg:        .asciiz "used ID!\n"
+
+edit_id_prompt: .asciiz "please enter ID: "
+edit_menu: .asciiz "\nto edit:\nid press (1)\nage press (2)\ngender press (3)\nname press (4)\ndisease press (6)\nto finish editing press (5)"
+new_id_prompt: .asciiz "please enter new ID: "
+new_age_prompt: .asciiz "please enter age: "
+new_gender_prompt: .asciiz "please enter gender(1 for male or 0 for female): "
+edit_gender_error: .asciiz "number out of range choose a valid number\n"
+new_name_prompt: .asciiz "please enter name: "
+new_disease_prompt: .asciiz "please enter new disease/medical condition: "
+edit_id_not_found: .asciiz "ID not found!"
+
+available_slots_msg: .asciiz "\nAvailable slots :"
+to_msg: .asciiz " to "
+comma_space_msg: .asciiz ", "
+reservation_num_msg: .asciiz " reservation number : "
+res_num_prompt: .asciiz "please enter reservation number :"
+slot_reserved_msg: .asciiz "slot reserved successfully :)\n"
+id_not_found_msg: .asciiz "ID not found!\n"
+res_num_out_of_range_msg: .asciiz "reservation number out of range!\n"
+newline_msg: .asciiz "\n"
+
+slot_canceled_msg: .asciiz "slot canceled successfully :)\n"
+no_reservations_msg: .asciiz "there is no reservations for this id\n"
+
+patient_info_msg: .asciiz "Patient:-\nID: "
+age_msg: .asciiz "\nAge: "
+gender_msg: .asciiz "\nGender: "
+name_msg: .asciiz "\nName: "
+disease_msg:      .asciiz "\nDisease/Medical Condition: "
+male_str: .asciiz "male"
+female_str: .asciiz "female"
+
+reservation_info_msg: .asciiz "from "
+reservation_to_msg: .asciiz " there is a reservation to patient with ID: "
+
+# Pharmacy data
+medicines:
+    .asciiz "Paracetamol"      # Medicine 1
+    .space 40                  # Padding
+    .word 5                   # Stock
+    .word 10                  # Price
+    
+    .asciiz "Amoxicillin"      # Medicine 2
+    .space 39                 # Padding
+    .word 8                   # Stock
+    .word 25                  # Price
+    
+    .asciiz "Ibuprofen"        # Medicine 3
+    .space 41                 # Padding
+    .word 12                  # Stock
+    .word 15                  # Price
+    
+    .asciiz "Vitamin C"        # Medicine 4
+    .space 41                 # Padding
+    .word 20                  # Stock
+    .word 8                   # Price
+    
+    .asciiz "Aspirin"          # Medicine 5
+    .space 43                 # Padding
+    .word 15                  # Stock
+    .word 12                  # Price
+
+medicine_count: .word 5
+medicine_struct_size: .word 52  # name(44) + stock(4) + price(4)
+
+pharmacy_menu: .asciiz "\n=== PHARMACY MODE ===\n1. View Medicine Stock\n2. Sell Medicine\n3. Restock Medicine\n4. View Patient Medicine History\n5. Exit Pharmacy Mode\nChoice: "
+view_stock_header: .asciiz "\n=== MEDICINE STOCK ===\n"
+medicine_info: .asciiz "Medicine: "
+stock_info: .asciiz " | Stock: "
+price_info: .asciiz " | Price: $"
+sell_medicine_prompt: .asciiz "Enter medicine name to sell: "
+sell_quantity_prompt: .asciiz "Enter quantity to sell: "
+sell_success: .asciiz "Sale successful! Total: $"
+sell_out_of_stock: .asciiz "Not enough stock available!\n"
+medicine_not_found: .asciiz "Medicine not found!\n"
+restock_prompt: .asciiz "Enter medicine name to restock: "
+restock_quantity_prompt: .asciiz "Enter quantity to add: "
+restock_success: .asciiz "Restock successful!\n"
+patient_med_history_prompt: .asciiz "Enter patient ID to view medicine history: "
+no_med_history_msg: .asciiz "No medicine history found for this patient.\n"
+med_history_header: .asciiz "\n=== MEDICINE HISTORY ===\n"
+prescribe_med_prompt: .asciiz "Enter medicine to prescribe: "
+prescribe_success: .asciiz "Medicine prescribed successfully!\n"
+
+reservations:
+    .word 2, 3, -1, 1           # Reservation 1: start_time = "2", finish_time = "3", id = -1, reservation_number = 1
+    .word 3, 4, -1, 2           # Reservation 2: start_time = "3", finish_time = "4", id = -1, reservation_number = 2
+    .word 4, 5, -1, 3           # Reservation 3: start_time = "4", finish_time = "5", id = -1, reservation_number = 3
+    .word 5, 6, -1, 4           # Reservation 4: start_time = "5", finish_time = "6", id = -1, reservation_number = 4
+    .word 6, 7, -1, 5           # Reservation 5: start_time = "6", finish_time = "7", id = -1, reservation_number = 5
+auth_options: .asciiz "\nFor Admin mode press (0)\nFor user mode press (1)\nFor Pharmacy mode press (3)\nTo exit press (2)\n"
+password_prompt: .asciiz "Please enter password: "
+admin_menu_options: .asciiz "\nTo add a new patient press (1)\nTo edit a patient info press (2)\nTo reserve a slot with the doctor press (3)\nTo cancel a reservation press (4)\nTo exit press (5)\n"
+add_patient_msg: .asciiz "Adding a new patient...\n"
+edit_patient_msg: .asciiz "Editing patient information...\n"
+reserve_slot_msg: .asciiz "Reserving a slot with the doctor...\n"
+cancel_reservation_msg: .asciiz "Canceling a reservation...\n"
+user_menu_options: .asciiz "\nTo view patient record press (1)\nTo view today's reservations press (2)\nTo exit press (3)\n"
+no_reservation_msg: .asciiz "there is no reservations for today :)\n"
+
+mode:   .word 0                    # Mode variable initialized to 0
+pass:   .word 0                    # Password variable initialized to 0
+wrong_pass: .word 0                # Wrong password attempts initialized to 0
+auth:   .word 3                    # Authentication mode initialized to 3
+name:   .space 52                  # Name buffer initialized to 52 bytes
+head:   .word 0                    # Head pointer initialized to NULL
+created: .word 0                   # Created pointer initialized to NULL
+disease_buffer: .space 100         # Buffer for disease input
+
+.text
+.globl main
+
+
+# Main function
+main:
+    # Function prologue
+    addi $sp, $sp, -72          # Adjust stack pointer
+    sw $ra, 68($sp)             # Save return address
+    sw $s0, 64($sp)             # Save $s0
+    sw $s1, 60($sp)             # Save $s1
+    sw $s2, 56($sp)             # Save $s2
+    sw $s3, 52($sp)             # Save $s3
+    sw $s4, 48($sp)             # Save $s4
+    sw $s5, 44($sp)             # Save $s5
+    sw $s6, 40($sp)             # Save $s6
+    sw $s7, 36($sp)             # Save $s7
+    
+    # Load variables
+    lw $s0, mode                # Load mode
+    lw $s1, pass                # Load pass
+    lw $s2, wrong_pass          # Load wrong_pass
+    lw $s3, auth                # Load auth
+    la $s4, name                # Load address of name buffer
+    lw $s5, head                # Load head pointer
+    lw $s6, created             # Load created pointer
+
+main_auth_input:
+    # Input authentication mode
+    li $t0, 3                   # Initialize authentication mode
+main_auth_loop:
+    # Print authentication options
+    li $v0, 4                   # Load system call code for 'print_string'
+    la $a0, auth_options        # Load address of authentication options
+    syscall                     # Print authentication options
+
+    # Get user input for authentication mode
+    li $v0, 5                   # Load system call code for 'read_integer'
+    syscall                     # Read integer input
+    move $t0, $v0               # Move input to $t0
+
+    # Admin mode
+    beq $t0, 0, main_admin_mode
+    # User mode
+    beq $t0, 1, main_user_mode
+    # Pharmacy mode
+    beq $t0, 3, main_pharmacy_mode
+    # Exit program
+    beq $t0, 2, main_exit_program
+    # Invalid input, retry
+    j main_auth_loop
+
+main_admin_mode:
+    # Admin mode
+    # Password authentication
+    li $t1, 3                   # Initialize password attempts
+    li $t2, 0                   # Initialize password
+    li $t3, 1234                # Set correct password
+
+main_password_auth:
+    # Print password prompt
+    li $v0, 4                   # Load system call code for 'print_string'
+    la $a0, password_prompt     # Load address of password prompt
+    syscall                     # Print password prompt
+
+    # Get user input for password
+    li $v0, 5                   # Load system call code for 'read_integer'
+    syscall                     # Read integer input
+    move $t2, $v0               # Move input to $t2
+
+    # Check password
+    beq $t2, $t3, main_admin_menu    # Correct password, proceed to admin menu
+    # Incorrect password
+    addi $t1, $t1, -1           # Decrement password attempts
+    bnez $t1, main_password_auth     # Retry password if attempts remain
+
+    # Maximum password attempts reached, exit program
+    j main_exit_program
+
+main_admin_menu:
+    # Admin menu
+    li $t4, 6                   # Initialize menu choice
+
+main_menu_loop:
+    # Print menu options
+    li $v0, 4                   # Load system call code for 'print_string'
+    la $a0, admin_menu_options  # Load address of admin menu options
+    syscall                     # Print admin menu options
+
+    # Get user input for menu choice
+    li $v0, 5                   # Load system call code for 'read_integer'
+    syscall                     # Read integer input
+    move $t4, $v0               # Move input to $t4
+
+    # Process menu choice
+    beq $t4, 1, main_add_patient     	 # Add new patient
+    beq $t4, 2, main_edit_patient   	 # Edit patient info
+    beq $t4, 3, main_reserve_slot   	 # Reserve slot with the doctor
+    beq $t4, 4, main_cancel_reservation  # Cancel reservation
+    beq $t4, 5, main_auth_loop    	 # Exit program
+    # Invalid choice, retry
+    j main_menu_loop
+
+main_add_patient:
+    # Add a new patient
+    la $a0, head                # Load address of head pointer
+    la $a1, created             # Load address of created node
+    la $a2, name                # Load address of name buffer
+    jal add_patient             # Call add_patient function
+    j main_menu_loop            # Return to admin menu
+
+main_edit_patient:
+    # Edit patient info
+    la $a0, head                # Load address of head pointer
+    la $a1, name                # Load address of name buffer
+    jal edit_patient            # Call edit_patient function
+    j main_menu_loop            # Return to admin menu
+
+main_reserve_slot:
+    # Reserve slot with the doctor
+    la $a0, reservations        # Load address of reservations array
+    la $a1, head                # Load address of head pointer
+    jal reserve                 # Call reserve function
+    j main_menu_loop            # Return to admin menu
+
+main_cancel_reservation:
+    # Cancel reservation
+    la $a0, reservations        # Load address of reservations array
+    la $a1, head                # Load address of head pointer
+    jal cancel_reservation      # Call cancel_reservation function
+    j main_menu_loop            # Return to admin menu
+
+main_user_mode:
+    # User mode
+    li $t4, 4                   # Initialize menu choice
+
+main_user_menu_loop:
+    # Print menu options
+    li $v0, 4                   # Load system call code for 'print_string'
+    la $a0, user_menu_options   # Load address of user menu options
+    syscall                     # Print user menu options
+
+    # Get user input for menu choice
+    li $v0, 5                   # Load system call code for 'read_integer'
+    syscall                     # Read integer input
+    move $t4, $v0               # Move input to $t4
+
+    # Process menu choice
+    beq $t4, 1, main_view_patient        # View patient record
+    beq $t4, 2, main_view_reservations   # View today's reservations
+    beq $t4, 3, main_auth_loop           # Exit program
+    # Invalid choice, retry
+    j main_user_menu_loop
+
+main_view_patient:
+    # View patient record
+    la $a0, head                # Load address of head pointer
+    jal view_patient            # Call view_patient function
+    j main_user_menu_loop       # Return to user menu
+
+main_view_reservations:
+    # View today's reservations
+    la $a0, reservations       # Load address of reservations array
+    jal view_reservations      # Call view_reservations function
+    j main_user_menu_loop      # Return to user menu
+
+main_pharmacy_mode:
+    # Pharmacy mode
+    la $a0, head               # Load address of head pointer
+    jal pharmacy_mode          # Call pharmacy_mode function
+    j main_auth_loop           # Return to auth menu
+
+main_exit_program:
+    # Function epilogue
+    lw $ra, 68($sp)             # Restore return address
+    lw $s0, 64($sp)             # Restore $s0
+    lw $s1, 60($sp)             # Restore $s1
+    lw $s2, 56($sp)             # Restore $s2
+    lw $s3, 52($sp)             # Restore $s3
+    lw $s4, 48($sp)             # Restore $s4
+    lw $s5, 44($sp)             # Restore $s5
+    lw $s6, 40($sp)             # Restore $s6
+    lw $s7, 36($sp)             # Restore $s7
+    addi $sp, $sp, 72           # Restore stack pointer
+    
+    # Exit program
+    li $v0, 10                  # Load system call code for 'exit'
+    syscall                     # Exit program
+
+
+#.........................................................................................................#
+
+# Function to search for a node by key
+search_nde:
+    # Function prologue
+    addi $sp, $sp, -12          # Adjust stack pointer
+    sw $ra, 0($sp)              # Save return address
+    sw $s0, 4($sp)              # Save $s0
+
+    # Load parameters
+    lw $a0, 0($a0)              # Load 'head' pointer'
+    
+    # Initialize variables
+    li $t0, 0                  		  # Initialize 'i'
+    la $t2, no_of_nodes                   # Initialize 'no_of_nodes'
+    lw $t1,($t2)
+    
+    # Check if only one node exists
+    beq $t1, $zero, not_found   # Skip if no nodes
+
+check_key:                  
+    lw $t2, 4($a0)             #load "id" in $t2
+    bne $t2, $a1, loop         # If id doesn't match, continue looping
+    move $v0, $a0              # return with the pointer as the result
+    jr $ra                     # Return 
+
+loop:
+    # Iterate through linked list
+    lw $a0, 16($a0)             # Load 'next' pointer
+    addi $t0, $t0, 1            # Increment 'i'
+    blt $t0, $t1, check_key     # Check if 'i' < 'no_of_nodes'
+
+not_found:
+    # Node not found, set 'temp' to NULL
+    li $v0, 0                   # Load NULL pointer to $v0
+
+    # Function epilogue
+    lw $ra, 0($sp)              # Restore return address
+    lw $s0, 4($sp)              # Restore $s0
+    addi $sp, $sp, 12           # Restore stack pointer
+    jr $ra                      # Return
+
+# Function to create a new node (UPDATED WITH DISEASE FIELD)
+create_nde:
+    # Function prologue
+    addi $sp, $sp, -28
+    sw $ra, 0($sp)
+    sw $s0, 4($sp)
+    sw $s1, 8($sp)
+    sw $s2, 12($sp)
+    sw $s3, 16($sp)
+    sw $s4, 20($sp)
+    sw $s5, 24($sp)
+
+    # Allocate memory for the node
+    li $v0, 9                   # Load system call code for 'malloc'
+    li $a0, 176                 # Increased size for disease field
+    syscall                     # Call 'malloc' to allocate memory
+    move $s0, $v0               # Save address of allocated memory in $s0
+
+    # Check if memory allocation was successful
+    beq $s0, $zero, allocation_failed
+
+    # Copy 'name' to the node
+    move $s1, $a3               # Copy 'name' pointer to $s1
+    addi $s2, $s0, 20           # name field in node
+copy_name_loop:
+    lb $s3, 0($s1)              # Load character from 'name'
+    sb $s3, 0($s2)              # Store character in 'name' field of node
+    addi $s1, $s1, 1            # Move to next character in 'name'
+    addi $s2, $s2, 1            # Move to next character in node
+    bnez $s3, copy_name_loop    # Continue loop if character is not null
+    sb $zero, 0($s2)            # Null-terminate 'name' field of node
+
+    # Copy 'disease' to the node (from stack - 172($sp))
+    lw $s4, 172($sp)            # disease pointer from stack
+    addi $s5, $s0, 72           # disease field in node
+copy_disease_loop:
+    lb $s3, 0($s4)              # Load character from 'disease'
+    sb $s3, 0($s5)              # Store character in 'disease' field of node
+    addi $s4, $s4, 1            # Move to next character in 'disease'
+    addi $s5, $s5, 1            # Move to next character in node
+    bnez $s3, copy_disease_loop # Continue loop if character is not null
+    sb $zero, 0($s5)            # Null-terminate 'disease' field of node
+
+    # Store other fields in the node
+    sw $a0, 0($s0)              # Store 'age'
+    sw $a1, 4($s0)              # Store 'id'
+    sw $a2, 8($s0)              # Store 'gender'
+    li $t0, 0                   # Initialize 'reservation' to 0
+    sw $t0, 12($s0)             # Store 'reservation'
+    sw $t0, 16($s0)             # Store NULL in 'next'
+
+    # Function epilogue
+    move $v0, $s0               # Move address of node to $v0
+    j create_nde_end
+
+allocation_failed:
+    # Memory allocation failed, return NULL
+    li $v0, 0                   # Load NULL pointer to $v0
+
+create_nde_end:
+    lw $ra, 0($sp)
+    lw $s0, 4($sp)
+    lw $s1, 8($sp)
+    lw $s2, 12($sp)
+    lw $s3, 16($sp)
+    lw $s4, 20($sp)
+    lw $s5, 24($sp)
+    addi $sp, $sp, 28
+    jr $ra
+
+# Function to append a node to the end of the linked list
+append_nde:
+    # Function prologue
+    addi $sp, $sp, -12          # Adjust stack pointer
+    sw $ra, 0($sp)              # Save return address
+    sw $s0, 4($sp)              # Save $s0
+
+    # Increment 'no_of_nodes'
+    lw $t0, no_of_nodes         # Load 'no_of_nodes'
+    addi $t0, $t0, 1            # Increment 'no_of_nodes'
+    sw $t0, no_of_nodes         # Store updated value of 'no_of_nodes'
+                      
+    # Check if the list is empty
+    beq $t0, 1, list_empty     # If 'h_ptr' is NULL, list is empty
+
+    # Traverse the list to find the last node
+traverse_loop:
+    lw $t1, 16($a1)              # Load 'next' pointer of current node
+    beq $t1, 0, found_last_node  # If 'next' is NULL, this is the last node
+    lw $a1, 16($a1)              # Move to next node
+    j traverse_loop              # Continue loop
+
+found_last_node:
+    # Append 'nde' to the end of the list
+    sw $a0, 16($a1)             # Store 'nde' in 'next' field of last node
+
+    # Function epilogue
+    lw $ra, 0($sp)              # Restore return address
+    lw $s0, 4($sp)              # Restore $s0
+    addi $sp, $sp, 12           # Restore stack pointer
+    jr $ra                      # Return
+
+list_empty:
+    # List is empty, set 'h_ptr' to 'nde'
+    sw $a0, 0($a1)
+
+    # Function epilogue
+    lw $ra, 0($sp)              # Restore return address
+    lw $s0, 4($sp)              # Restore $s0
+    addi $sp, $sp, 12           # Restore stack pointer
+    jr $ra                      # Return
+    
+# Function to delete a node with the given key
+delete_nde:
+    # Function prologue
+    addi $sp, $sp, -12          # Adjust stack pointer
+    sw $ra, 0($sp)              # Save return address
+    sw $s0, 4($sp)              # Save $s0
+    sw $s1, 8($sp)              # Save $s1
+
+    # Load parameters
+    lw $a0, 0($a0)              # Load 'head' pointer
+
+    # Search for the node to delete
+    jal search_nde               # Call 'search_nde' function
+    move $s1, $v0                # Move result (deleted node) to $s1
+
+    # Check if node was found
+    beq $s1, $zero, data_not_found  # If deleted node is NULL, data not found
+
+    # Initialize 'temp' to 'head'
+    move $s0, $a0                  # Move 'head' pointer to $s0
+
+    # Check if the node to delete is the head of the list
+    beq $s1, $a0, delete_head     # If deleted node is the head, delete head
+
+    # Find the node before the deleted node
+find_previous:
+    lw $t0, 16($s0)             # Load 'next' pointer of current node
+    beq $t0, $s1, delete_node   # If 'next' is the deleted node, delete node
+    move $s0, $t0               # Move to next node
+    j find_previous             # Continue loop
+
+delete_head:
+    # Update 'head' to point to the next node
+    lw $t0, 16($a0)             # Load 'next' pointer of head
+    move $a0, $t0               # Move 'next' to 'head'
+
+delete_node:
+    # Update pointers to delete node
+    lw $t0, 16($s1)             # Load 'next' pointer of deleted node
+    sw $t0, 16($s0)             # Update 'next' pointer of previous node
+
+    # Free memory allocated for deleted node
+    li $v0, 9                   # Load system call code for 'free'
+    move $a0, $s1               # Move address of deleted node to $a0
+    syscall                     # Call 'free' to deallocate memory
+
+    # Function epilogue
+    lw $ra, 0($sp)              # Restore return address
+    lw $s0, 4($sp)              # Restore $s0
+    lw $s1, 8($sp)              # Restore $s1
+    addi $sp, $sp, 12           # Restore stack pointer
+    jr $ra                      # Return
+
+data_not_found:
+    # Data not found, print error message
+    li $v0, 4                   # Load system call code for 'print_string'
+    la $a0, data_not_found_msg  # Load address of error message
+    syscall                     # Print error message
+
+    # Function epilogue
+    lw $ra, 0($sp)              # Restore return address
+    lw $s0, 4($sp)              # Restore $s0
+    lw $s1, 8($sp)              # Restore $s1
+    addi $sp, $sp, 12           # Restore stack pointer
+    jr $ra                      # Return
+
+#..........................................................................................................#
+
+# Function to search for a reservation by reservation number
+array_search_rn:
+    # Function prologue
+    addi $sp, $sp, -12          # Adjust stack pointer
+    sw $ra, 0($sp)              # Save return address
+    sw $s0, 4($sp)              # Save $s0
+
+    # Initialize loop counter
+    li $t0, 0                   # Initialize 'i'
+
+search_rn_loop:
+    # Load 'reservation_number' of current reservation
+    lw $t1, 12($a0)             # Load 'reservation_number' field
+    
+
+    # Compare with 'reservation_number'
+    beq $t1, $a1, found_rn      # If match, exit loop
+
+    # Move to next reservation
+    addi $a0, $a0, 16           # Move to next 'reservation' structure
+    addi $t0, $t0, 1            # Increment loop counter
+    j search_rn_loop            # Continue loop
+
+found_rn:
+    # Function epilogue
+    move $v0, $t0               # Return loop counter
+    lw $ra, 0($sp)              # Restore return address
+    lw $s0, 4($sp)              # Restore $s0
+    addi $sp, $sp, 12           # Restore stack pointer
+    jr $ra                      # Return
+
+# Function to search for a reservation by ID
+array_search_id:
+    # Function prologue
+    addi $sp, $sp, -12          # Adjust stack pointer
+    sw $ra, 0($sp)              # Save return address
+    sw $s0, 4($sp)              # Save $s0
+
+    # Initialize loop counter
+    li $t0, 0                   # Initialize 'i'
+
+search_id_loop:
+    # Load 'id' of current reservation
+    lw $t1, 8($a0)             # Load 'id' field
+
+    # Compare with 'id'
+    beq $t1, $a1, found_id     # If match, exit loop
+
+    # Move to next reservation
+    addi $a0, $a0, 16           # Move to next 'reservation' structure
+    addi $t0, $t0, 1            # Increment loop counter
+    j search_id_loop            # Continue loop
+
+found_id:
+    # Function epilogue
+    move $v0, $t0               # Return loop counter
+    lw $ra, 0($sp)              # Restore return address
+    lw $s0, 4($sp)              # Restore $s0
+    addi $sp, $sp, 12           # Restore stack pointer
+    jr $ra                      # Return
+
+   #.............................................................................................#
+   
+# Function to add a new patient to the linked list (UPDATED WITH DISEASE FIELD)
+add_patient:
+    # Function prologue
+    addi $sp, $sp, -40
+    sw $ra, 0($sp)
+    sw $s0, 4($sp)
+    sw $s1, 8($sp)
+    sw $s2, 12($sp)
+    sw $s3, 16($sp)
+    sw $s4, 20($sp)
+    sw $s5, 24($sp)
+    sw $s6, 28($sp)
+    sw $zero, 32($sp)  # Space for disease input
+    sw $zero, 36($sp)
+
+    # Load parameters
+    lw $a1, 0($a1)              # Load 'created' pointer
+    move $s4, $a0               # save 'head' pointer
+    # Print prompt for ID
+    li $v0, 4                   # Load system call code for 'print_string'
+    la $a0, id_prompt           # Load address of prompt
+    syscall                     # Print prompt
+
+    # Read ID from user
+    li $v0, 5                   # Load system call code for 'read_integer'
+    syscall                     # Read integer from user
+    move $s3, $v0               # Move ID to $s3
+
+    # Search for existing patient with the same ID
+    move $a0, $s4               # Copy 'head' to $a0 (no need to reload)
+    move $a1, $s3               # Move ID to $a1
+    jal search_nde              # Call 'search_nde' function
+    move $s0, $v0               # Move result (found node) to $s0
+
+    # Check if patient with same ID already exists
+    bnez $s0, id_used           # Branch if patient with same ID exists
+
+    # Print prompt for age
+    li $v0, 4                   # Load system call code for 'print_string'
+    la $a0, age_prompt          # Load address of prompt
+    syscall                     # Print prompt
+
+    # Read age from user
+    li $v0, 5                   # Load system call code for 'read_integer'
+    syscall                     # Read integer from user
+    move $s1, $v0               # Move age to $s1 
+
+    # Loop to ensure valid gender input
+gender_input_loop:
+    # Print prompt for gender
+    li $v0, 4                   # Load system call code for 'print_string'
+    la $a0, gender_prompt       # Load address of prompt
+    syscall                     # Print prompt
+
+    # Read gender from user
+    li $v0, 5                   # Load system call code for 'read_integer'
+    syscall                     # Read integer from user
+    move $s2, $v0               # Move gender to $s2
+
+    # Check if gender is valid (0 or 1)
+    bnez $s2, check_gender_valid # Branch if gender is 1
+    beqz $s2, gender_valid      # Branch if gender is 0
+
+check_gender_valid:
+    beq $s2, 1, gender_valid    # Check if gender is 1
+
+    # Print error message for invalid gender
+    li $v0, 4                   # Load system call code for 'print_string'
+    la $a0, gender_error        # Load address of error message
+    syscall                     # Print error message
+    j gender_input_loop         # Repeat loop for gender input
+
+gender_valid:
+
+    # Print prompt for name
+    li $v0, 4                   # Load system call code for 'print_string'
+    la $a0, name_prompt         # Load address of prompt
+    syscall                     # Print prompt
+
+    # Read name from user
+    li $v0, 8                   # Load system call code for 'read_string'
+    move $a0, $a2               # Load address of 'name' buffer
+    li $a1, 50                  # Load maximum length of input
+    syscall                     # Read string from user
+
+    # Print prompt for disease
+    li $v0, 4                   # Load system call code for 'print_string'
+    la $a0, disease_prompt      # Load address of prompt
+    syscall                     # Print prompt
+
+    # Read disease from user
+    li $v0, 8                   # Load system call code for 'read_string'
