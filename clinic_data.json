@@ -1,0 +1,32 @@
+{
+    "patients": [
+        {
+            "id": 3,
+            "name": "Kanwal",
+            "age": "19",
+            "gender": "Female",
+            "disease": "Headache"
+        },
+        {
+            "id": 5,
+            "name": "Aamnah",
+            "age": "20",
+            "gender": "Female",
+            "disease": "Fever"
+        }
+    ],
+    "reserved_slots": [
+        {
+            "ref": 4,
+            "patient_id": 3,
+            "type": "Online",
+            "timing": "12:00 PM to 1:00 PM"
+        },
+        {
+            "ref": 7,
+            "patient_id": 5,
+            "type": "Online",
+            "timing": "3:00 PM to 4:00 PM"
+        }
+    ]
+}
