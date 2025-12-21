@@ -57,19 +57,8 @@ How to Run the Project
 
 Files Included
 --------------
-- ClinicManagement.asm          (Main MIPS program)
+- Healexis.asm          (Main MIPS program)
 - clinic_backup.py              (Permanent backup tool - double-click to run)
 - clinic_data.json              (Generated backup file - contains all data)
 - README.txt                    (This file)
-
-Note for Demo
--------------
-- Run the MIPS program and demonstrate all features
-- Show clinic_data.json file to prove persistent storage
-- Open clinic_backup.py to show how backup is maintained
-
-Developed by: [Your Name]
-Roll Number: [Your Roll No]
-Date: December 2025
-
-Thank you!
+ 
