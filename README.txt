@@ -1,5 +1,5 @@
 ===========================
-CLINIC MANAGEMENT SYSTEM
+HEALEXIS
 MIPS Assembly Project
 ===========================
 
